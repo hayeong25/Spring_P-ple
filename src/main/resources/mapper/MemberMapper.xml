@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.pple.dao.MemberDao">
+    <select id="getMemberById" parameterType="String" resultType="com.api.pple.entity.Member">
+        SELECT member_id AS id,
+               member_password AS password,
+               member_name AS name,
+               member_type AS memberType,
+               member_contact AS telNo,
+               member_email AS email,
+               member_level AS memberLevel,
+               member_business_no AS businessNo,
+               member_company_name AS companyName,
+               member_zipcode AS zipcode,
+               member_address AS address,
+               member_use_yn AS useYn
+        FROM MEMBER
+        WHERE member_id = #{id}
+    </select>
+
+    <insert id="insertMember">
+        INSERT INTO MEMBER (
+            member_id,
+            member_password,
+            member_name,
+            member_type,
+            member_contact,
+            member_email,
+            member_level,
+            member_company_name,
+            member_zipcode,
+            member_address,
+            member_business_no,
+            member_enrollment_date,
+            member_dormancy_expect_date,
+            member_use_yn,
+            member_sns
+        ) VALUES (
+            #{id},
+            #{password},
+            #{name},
+            '일반회원',
+            #{telNo},
+            #{email},
+            1,
+            #{companyName},
+            #{zipcode},
+            #{address},
+            #{businessNo},
+            NOW(),
+            DATE_ADD(NOW(), INTERVAL 1 YEAR),
+            1,
+            'P플'
+        )
+    </insert>
+
+    <select id="getMemberByToken" parameterType="String" resultType="com.api.pple.entity.Member">
+        SELECT M.member_id AS id,
+               M.member_password AS password,
+               M.member_name AS name,
+               M.member_type AS memberType,
+               M.member_contact AS telNo,
+               M.member_email AS email,
+               M.member_level AS memberLevel,
+               M.member_business_no AS businessNo,
+               M.member_company_name AS companyName,
+               M.member_zipcode AS zipcode,
+               M.member_address AS address,
+               M.member_use_yn AS useYn
+        FROM MEMBER M
+            LEFT JOIN TOKEN T
+                ON T.member_id = M.member_id
+        WHERE T.token = #{accessToken}
+    </select>
+    
+    <select id="getMemberIdByNameAndTelNo" resultType="String">
+        SELECT member_id
+        FROM MEMBER
+        WHERE member_name = #{name}
+        AND member_contact = #{telNo}
+        AND member_state = '정상'
+    </select>
+
+    <select id="getMemberPoint" parameterType="String" resultType="Integer">
+        SELECT ISNULL(SUM(A.get - B.used), 0)
+        FROM (
+            SELECT SUM(member_point) AS get
+            FROM MEMBER_POINT
+            WHERE member_id = #{id}
+            AND member_point_type IN ('매출적립', '이벤트', '마켓 결제 취소', '광고 결제 취소')
+        ) AS A,
+             (
+            SELECT SUM(member_point) AS used
+            FROM MEMBER_POINT
+            WHERE member_id = #{id}
+            AND member_point_type IN ('마켓결제', '광고결제', '매출취소')
+        ) AS B
+    </select>
+
+    <select id="getMemberPointHistory" parameterType="String" resultType="com.api.pple.dto.PointDto">
+        SELECT member_id AS id,
+               member_point_type AS type,
+               member_point_division AS status,
+               member_point AS point,
+               member_point_enrollment_date AS getDateTime,
+               member_point_use_date AS useDateTime
+        FROM MEMBER_POINT
+        WHERE member_id = #{id}
+    </select>
+
+    <select id="getMonthlySales" parameterType="String" resultType="Integer">
+        SELECT ISNULL(SUM(A.plus - B.minus), 0)
+        FROM (
+            SELECT ISNULL(SUM(sales_transaction_amount), 0) AS plus
+            FROM SALES
+            WHERE sales_state = '승인'
+            AND sales_approval_date LIKE CONCAT(DATE_FORMAT(NOW(), '%Y-%m'), '%')
+            AND member_id = {id}
+            AND sales_delete_yn = 0
+        ) AS A,
+             (
+            SELECT ISNULL(SUM(sales_transaction_amount), 0) AS minus
+            FROM SALES
+            WHERE sales_state != '승인'
+            AND sales_approval_date LIKE CONCAT(DATE_FORMAT(NOW(), '%Y-%m'), '%')
+            AND member_id = {id}
+            AND sales_delete_yn = 0
+        ) AS B
+    </select>
+
+    <select id="getTotalSales" parameterType="String" resultType="Integer">
+        SELECT ISNULL(SUM(A.plus - B.minus), 0)
+        FROM (
+            SELECT ISNULL(SUM(sales_transaction_amount), 0) AS plus
+            FROM SALES
+            WHERE sales_state = '승인'
+            AND member_id = {id}
+            AND sales_delete_yn = 0
+        ) AS A,
+             (
+            SELECT ISNULL(SUM(sales_transaction_amount), 0) AS minus
+            FROM SALES
+            WHERE sales_state != '승인'
+            AND member_id = {id}
+            AND sales_delete_yn = 0
+        ) AS B
+    </select>
+
+    <update id="updatePassword">
+        UPDATE MEMBER
+        SET member_password = #{password},
+            modify_datetime = NOW()
+        WHERE member_id = #{id}
+    </update>
+
+    <update id="updateTelNo">
+        UPDATE MEMBER
+        SET member_contact = #{telNo},
+            modify_datetime = NOW()
+        WHERE member_id = #{id}
+    </update>
+
+    <update id="withdraw">
+        UPDATE MEMBER
+        SET member_use_yn = 0,
+            modify_datetime = NOW()
+        WHERE member_id = #{id}
+    </update>
+</mapper>
