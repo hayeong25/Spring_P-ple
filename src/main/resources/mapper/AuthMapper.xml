@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.pple.dao.AuthDao">
+    <select id="getTokenEndDate" parameterType="String" resultType="LocalDateTime">
+        SELECT token_end_date
+        FROM TOKEN
+        WHERE token = #{accessToken}
+    </select>
+
+    <delete id="deleteOtp" parameterType="String">
+        DELETE FROM CERTIFICATIONNO
+        WHERE contact = #{telNo}
+    </delete>
+
+    <insert id="insertOtp">
+        INSERT INTO CERTIFICATIONNO (
+            certification_no,
+            certification_no_enrollment_date,
+            certification_no_expire_date,
+            contact
+        ) VALUES (
+            #{otp},
+            NOW(),
+            DATE_ADD(NOW(), INTERVAL 3 MINUTE),
+            #{telNo}
+        )
+    </insert>
+
+    <insert id="insertKakaoTalkLog">
+        INSERT INTO KAKAO (
+            kakao_type,
+            kakao_contact,
+            kakao_content,
+            kakao_json,
+            kakao_enrollment_date,
+            kakao_uid
+        ) VALUES (
+            #{kakaoTalk.template},
+            #{kakaoTalk.mobile},
+            #{kakaoTalk.message},
+            #{kakaoTalk},
+            NOW(),
+            #{response}
+        )
+    </insert>
+
+    <insert id="insertToken">
+        INSERT INTO TOKEN (
+            member_id,
+            token,
+            token_end_date
+        ) VALUES (
+            #{id},
+            #{accessToken},
+            DATE_ADD(NOW(), INTERVAL 30 MINUTE)
+        )
+    </insert>
+
+    <delete id="deleteToken">
+        DELETE FROM TOKEN
+        WHERE token = #{accessToken}
+    </delete>
+</mapper>
