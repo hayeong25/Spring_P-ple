@@ -12,7 +12,7 @@ public enum ErrorCode {
     UPDATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "52", "데이터 수정 실패"),
     DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "53", "데이터 삭제 실패"),
     INVALID_ID(HttpStatus.NOT_FOUND, "68", "존재하지 않는 ID입니다"),
-    INVALID_ACCOUNT(HttpStatus.FORBIDDEN, "71", "탈퇴한 계정입니다"),
+    INVALID_ACCOUNT(HttpStatus.FORBIDDEN, "71", "유효하지 않은 계정입니다"),
     INVALID_OTP(HttpStatus.FORBIDDEN, "72", "인증번호가 유효하지 않습니다"),
     INVALID_PASSWORD(HttpStatus.NOT_FOUND, "74", "비밀번호가 일치하지 않습니다"),
     DUPLICATE_ID(HttpStatus.FORBIDDEN, "88", "이미 사용 중이거나 탈퇴한 아이디입니다"),
