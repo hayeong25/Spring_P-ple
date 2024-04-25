@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.pple.dao.AdDao">
+    <select id="getAdList" resultType="com.api.pple.dto.AdDto">
+        SELECT  advertise_code AS code,
+                advertise_manufacturer_company_name AS companyName,
+                advertise_img AS image,
+                advertise_url AS url,
+                advertise_state AS status,
+                advertise_enrollment_date AS enrollmentDateTime
+        FROM ADVERTISE
+        WHERE division = '게시'
+        AND advertise_state = '광고중'
+    </select>
+
+    <select id="getAdDetail" parameterType="String" resultType="com.api.pple.dto.AdDto">
+        SELECT  advertise_code AS code,
+                advertise_manufacturer_company_name AS companyName,
+                advertise_img AS image,
+                advertise_url AS url,
+                advertise_state AS status,
+                advertise_enrollment_date AS enrollmentDateTime
+        FROM ADVERTISE
+        WHERE advertise_code = #{adCode}
+    </select>
+
+    <insert id="registerAd" useGeneratedKeys="true" keyColumn="advertise_code" keyProperty="code">
+        INSERT INTO ADVERTISE (
+            advertise_manufacturer_company_name,
+            advertise_img,
+            advertise_url,
+            advertise_division,
+            advertise_state,
+            advertise_enrollment_date
+        ) VALUES (
+            #{companyName},
+            #{image},
+            #{url},
+            '신청',
+            '신청',
+            #{enrollmentDateTime}
+        )
+    </insert>
+
+    <update id="deleteAd">
+        UPDATE ADVERTISE
+        SET advertise_status = '광고종료'
+        WHERE advertise_code = #{adCode}
+    </update>
+</mapper>
