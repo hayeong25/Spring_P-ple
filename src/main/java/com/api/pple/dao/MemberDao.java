@@ -17,6 +17,8 @@ public interface MemberDao {
 
     String getMemberIdByNameAndTelNo(String name, String telNo);
 
+    int updateMemberPoint(PointDto point);
+
     int getMemberPoint(String id);
 
     List<PointDto> getMemberPointHistory(String id);

@@ -81,6 +81,24 @@
         AND member_state = '정상'
     </select>
 
+    <insert id="updateMemberPoint">
+        INSERT INTO MEMBER_POINT (
+            member_id,
+            member_point_type,
+            member_point_division,
+            member_point,
+            member_point_enrollment_date,
+            member_point_use_date
+        ) VALUES (
+            #{id},
+            #{type},
+            #{status},
+            #{point},
+            #{getDateTime},
+            #{useDateTime}
+        )
+    </insert>
+
     <select id="getMemberPoint" parameterType="String" resultType="Integer">
         SELECT ISNULL(SUM(A.get - B.used), 0)
         FROM (

@@ -58,6 +58,16 @@ public class MemberController {
     }
 
     /*
+     * 포인트 적립, 사용
+     */
+    @PutMapping("/updatePoint")
+    public ResponseEntity<String> updateMemberPoint(@RequestBody @Valid PointDto request, HttpServletRequest servletRequest) {
+        log.info("MemberController updateMemberPoint requestBody : {}, Header : {}", request, servletRequest);
+        String accessToken = Token.getAccessTokenFromHeader(servletRequest);
+        return ResponseEntity.ok(memberService.updateMemberPoint(request, accessToken));
+    }
+
+    /*
     * 회원 포인트 조회 
     */
     @PostMapping("/point")

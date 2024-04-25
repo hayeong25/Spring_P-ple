@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -29,6 +31,8 @@ public class MemberService {
     MemberDao memberDao;
 
     private final static int USE_N = 0;
+
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     public String join(MemberDto.Join request) {
         Member member = memberDao.getMemberById(request.getId());
@@ -118,6 +122,35 @@ public class MemberService {
         }
 
         return member.getId();
+    }
+
+    public String updateMemberPoint(PointDto request, String accessToken) {
+        Token.checkToken(accessToken);
+
+        Member member = memberDao.getMemberByToken(accessToken);
+
+        if (ObjectUtils.isEmpty(member)) {
+            throw new ClientException(ErrorCode.INVALID_TOKEN);
+        }
+
+        String dateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT));
+
+        PointDto point = PointDto.builder()
+                .id(member.getId())
+                .type(request.getType())
+                .status(request.getStatus())
+                .point(request.getPoint())
+                .getDateTime(request.getStatus().equals("적립") ? dateTime : null)
+                .useDateTime(request.getStatus().equals("사용") ? dateTime : null)
+                .build();
+
+        int result = memberDao.updateMemberPoint(point);
+
+        if (result < 1) {
+            throw new ClientException(ErrorCode.UPDATE_FAIL);
+        }
+
+        return point.getStatus();
     }
 
     public int getMemberPoint(String accessToken) {
