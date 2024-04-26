@@ -1,8 +1,7 @@
 package com.api.pple.dao;
 
-import com.api.pple.dto.MemberDto;
-import com.api.pple.dto.PointDto;
 import com.api.pple.entity.Member;
+import com.api.pple.entity.Point;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,17 +10,19 @@ import java.util.List;
 public interface MemberDao {
     Member getMemberById(String id);
 
-    int insertMember(MemberDto.Join request);
+    int insertMember(Member request);
 
     Member getMemberByToken(String accessToken);
 
     String getMemberIdByNameAndTelNo(String name, String telNo);
 
-    int updateMemberPoint(PointDto point);
+    int certifyBusiness(Member member);
+
+    int updateMemberPoint(Point point);
 
     int getMemberPoint(String id);
 
-    List<PointDto> getMemberPointHistory(String id);
+    List<Point> getMemberPointHistory(String id);
 
     int getMonthlySales(String id);
 

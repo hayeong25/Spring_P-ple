@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.api.pple.dao.NoticeDao">
-    <select id="getNoticeList" resultType="com.api.pple.dto.NoticeDto">
-        SELECT notice_id AS id,
-               notice_title AS title,
-               notice_fixed_yn AS fixedYn,
-               notice_enrollment_date AS enrollmentDateTime
+    <select id="getNoticeList" resultType="com.api.pple.entity.Notice">
+        SELECT notice_id,
+               notice_title,
+               notice_content,
+               notice_use_yn,
+               notice_fixed_yn,
+               notice_enrollment_date
         FROM NOTICE
         WHERE notice_use_yn = 1
     </select>
 
-    <select id="getNoticeDetail" parameterType="String" resultType="com.api.pple.dto.NoticeDto">
-        SELECT  notice_id AS id,
-                notice_writer AS writer,
-                notice_title AS title,
-                notice_content AS content,
-                notice_fixed_yn AS fixedYn,
-                notice_enrollment_date AS enrollmentDateTime
+    <select id="getNoticeDetail" parameterType="String" resultType="com.api.pple.entity.Notice">
+        SELECT  notice_id,
+                notice_title,
+                notice_content,
+                notice_use_yn,
+                notice_fixed_yn,
+                notice_enrollment_date
         FROM NOTICE
         WHERE notice_use_yn = 1
         AND notice_id = #{noticeId}
     </select>
 
-    <insert id="registerNotice" useGeneratedKeys="true" keyColumn="notice_id" keyProperty="id">
+    <insert id="registerNotice" useGeneratedKeys="true" keyColumn="notice_id" keyProperty="noticeId">
         INSERT INTO NOTICE (
-            notice_writer,
             notice_title,
             notice_content,
             notice_fixed_yn,
             notice_use_yn,
             notice_enrollment_date
         ) VALUES (
-            #{writer},
-            #{title},
-            #{content},
-            1,
-            1,
-            #{enrollmentDateTime}
+            #{noticeTitle},
+            #{noticeContent},
+            #{noticeFixedYn},
+            #{noticeUseYn},
+            #{noticeEnrollmentDate}
         )
     </insert>
 

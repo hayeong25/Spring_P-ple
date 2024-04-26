@@ -2,18 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.api.pple.dao.MemberDao">
     <select id="getMemberById" parameterType="String" resultType="com.api.pple.entity.Member">
-        SELECT member_id AS id,
-               member_password AS password,
-               member_name AS name,
-               member_type AS memberType,
-               member_contact AS telNo,
-               member_email AS email,
-               member_level AS memberLevel,
-               member_business_no AS businessNo,
-               member_company_name AS companyName,
-               member_zipcode AS zipcode,
-               member_address AS address,
-               member_use_yn AS useYn
+        SELECT member_id,
+               member_password,
+               member_name,
+               member_type,
+               member_contact,
+               member_email,
+               member_level,
+               member_business_no,
+               member_company_name,
+               member_zipcode,
+               member_address,
+               member_use_yn,
+               member_enrollment_date,
+               member_dormancy_expect_date
         FROM MEMBER
         WHERE member_id = #{id}
     </select>
@@ -27,46 +29,42 @@
             member_contact,
             member_email,
             member_level,
-            member_company_name,
             member_zipcode,
             member_address,
-            member_business_no,
+            member_use_yn,
             member_enrollment_date,
             member_dormancy_expect_date,
-            member_use_yn,
-            member_sns
         ) VALUES (
-            #{id},
-            #{password},
-            #{name},
-            '일반회원',
-            #{telNo},
-            #{email},
-            1,
-            #{companyName},
-            #{zipcode},
-            #{address},
-            #{businessNo},
-            NOW(),
-            DATE_ADD(NOW(), INTERVAL 1 YEAR),
-            1,
-            'P플'
+            #{memberId},
+            #{memberPassword},
+            #{memberName},
+            #{memberType},
+            #{memberContact},
+            #{memberEmail},
+            #{memberLevel},
+            #{memberZipcode},
+            #{memberAddress},
+            #{memberUseYn},
+            #{memberEnrollmentDate},
+            #{memberDormancyExpectDate}
         )
     </insert>
 
     <select id="getMemberByToken" parameterType="String" resultType="com.api.pple.entity.Member">
-        SELECT M.member_id AS id,
-               M.member_password AS password,
-               M.member_name AS name,
-               M.member_type AS memberType,
-               M.member_contact AS telNo,
-               M.member_email AS email,
-               M.member_level AS memberLevel,
-               M.member_business_no AS businessNo,
-               M.member_company_name AS companyName,
-               M.member_zipcode AS zipcode,
-               M.member_address AS address,
-               M.member_use_yn AS useYn
+        SELECT  M.member_id,
+                M.member_password,
+                M.member_name,
+                M.member_type,
+                M.member_contact,
+                M.member_email,
+                M.member_level,
+                M.member_business_no,
+                M.member_company_name,
+                M.member_zipcode,
+                M.member_address,
+                M.member_use_yn,
+                M.member_enrollment_date,
+                M.member_dormancy_expect_date
         FROM MEMBER M
             LEFT JOIN TOKEN T
                 ON T.member_id = M.member_id
@@ -81,21 +79,32 @@
         AND member_state = '정상'
     </select>
 
+    <update id="certifyBusiness">
+        UPDATE MEMBER
+        SET member_type = #{memberType},
+            member_business_no = #{memberBusinessNo},
+            member_company_name = #{memberCompanyName},
+            modify_datetime = NOW()
+        WHERE member_id = #{memberId}
+    </update>
+
     <insert id="updateMemberPoint">
         INSERT INTO MEMBER_POINT (
             member_id,
             member_point_type,
             member_point_division,
             member_point,
+            member_point_get_content,
             member_point_enrollment_date,
             member_point_use_date
         ) VALUES (
-            #{id},
-            #{type},
-            #{status},
-            #{point},
-            #{getDateTime},
-            #{useDateTime}
+            #{memberId},
+            #{memberPointType},
+            #{memberPointDivision},
+            #{memberPoint},
+            #{memberPointGetContent},
+            #{memberPointEnrollmentDate},
+            #{memberPointUseDate}
         )
     </insert>
 
@@ -105,23 +114,24 @@
             SELECT SUM(member_point) AS get
             FROM MEMBER_POINT
             WHERE member_id = #{id}
-            AND member_point_type IN ('매출적립', '이벤트', '마켓 결제 취소', '광고 결제 취소')
+            AND member_point_division = '적립'
         ) AS A,
              (
             SELECT SUM(member_point) AS used
             FROM MEMBER_POINT
             WHERE member_id = #{id}
-            AND member_point_type IN ('마켓결제', '광고결제', '매출취소')
+            AND member_point_division = '사용'
         ) AS B
     </select>
 
-    <select id="getMemberPointHistory" parameterType="String" resultType="com.api.pple.dto.PointDto">
-        SELECT member_id AS id,
-               member_point_type AS type,
-               member_point_division AS status,
-               member_point AS point,
-               member_point_enrollment_date AS getDateTime,
-               member_point_use_date AS useDateTime
+    <select id="getMemberPointHistory" parameterType="String" resultType="com.api.pple.entity.Point">
+        SELECT member_id,
+               member_point_type,
+               member_point_division,
+               member_point,
+               member_point_content,
+               member_point_enrollment_date,
+               member_point_use_date
         FROM MEMBER_POINT
         WHERE member_id = #{id}
     </select>

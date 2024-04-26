@@ -1,55 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.api.pple.dao.ProductDao">
-    <select id="getProductList" resultType="com.api.pple.dto.ProductDto">
-        SELECT product_code AS code,
-               product_category AS category,
-               product_brand AS brand,
-               product_name AS name,
+    <select id="getProductList" resultType="com.api.pple.entity.Product">
+        SELECT product_code,
+               product_name,
+               product_type,
+               category,
+               product_stock_count,
+               product_original_price,
+               product_sale_price,
+               product_discount_ratio,
                product_url AS url,
-               product_stock_count AS stock,
-               product_original_price AS price,
-               product_sale_price AS salePrice,
-               product_discount_ratio AS saleRatio
+               product_display_yn,
+               product_enrollment_date
         FROM PRODUCT
         WHERE product_display_yn = 1
     </select>
 
-    <select id="getProductDetail" parameterType="String" resultType="com.api.pple.dto.ProductDto">
-        SELECT  product_code AS code,
-                product_category AS category,
-                product_brand AS brand,
-                product_name AS name,
+    <select id="getProductDetail" parameterType="String" resultType="com.api.pple.entity.Product">
+        SELECT  product_code,
+                product_name,
+                product_type,
+                category,
+                product_stock_count,
+                product_original_price,
+                product_sale_price,
+                product_discount_ratio,
                 product_url AS url,
-                product_stock_count AS stock,
-                product_original_price AS price,
-                product_sale_price AS salePrice,
-                product_discount_ratio AS saleRatio
+                product_display_yn,
+                product_enrollment_date
         FROM PRODUCT
         WHERE product_code = #{productCode}
     </select>
 
     <insert id="registerProduct" useGeneratedKeys="true" keyColumn="product_code" keyProperty="code">
         INSERT INTO PRODUCT (
-            product_category,
-            product_brand,
             product_name,
-            product_url,
+            product_type,
+            product_category,
             product_stock_count,
             product_original_price,
             product_sale_price,
             product_discount_ratio,
+            product_url,
             product_display_yn
         ) VALUES (
+            #{productName},
+            #{productType},
             #{category},
-            #{brand},
-            #{name},
-            #{url},
-            #{stock},
-            #{price},
-            #{salePrice},
-            #{saleRatio},
-            1
+            #{productStockCount},
+            #{productOriginalPrice},
+            #{productSalePrice},
+            #{productDiscountRatio},
+            #{productUrl},
+            #{productDisplayYn},
+            #{productEnrollmentDate}
         )
     </insert>
 

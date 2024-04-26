@@ -1,13 +1,12 @@
 package com.api.pple.service;
 
-import com.api.pple.dao.MemberDao;
 import com.api.pple.dao.NoticeDao;
-import com.api.pple.dto.NoticeDto;
-import com.api.pple.entity.Member;
+import com.api.pple.dto.request.NoticeRequest;
+import com.api.pple.dto.response.NoticeResponse;
+import com.api.pple.entity.Notice;
 import com.api.pple.exception.ClientException;
 import com.api.pple.utils.ErrorCode;
-import com.api.pple.utils.Token;
-import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -15,67 +14,60 @@ import org.springframework.util.ObjectUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
-@Slf4j
 @Service
 public class NoticeService {
     @Autowired
     NoticeDao noticeDao;
 
-    @Autowired
-    MemberDao memberDao;
-
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    public List<NoticeDto> getNoticeList(String accessToken) {
-        Token.checkToken(accessToken);
+    private static final ModelMapper modelMapper = new ModelMapper();
 
-        return noticeDao.getNoticeList();
+    public List<NoticeResponse> getNoticeList() {
+        List<Notice> noticeList = Optional.of(noticeDao.getNoticeList())
+                                          .orElseThrow(() -> new ClientException(ErrorCode.SERVER_ERROR));
+
+        return noticeList.stream()
+                         .map(m -> new NoticeResponse(m.getNoticeId(), m.getNoticeTitle(), m.getNoticeContent(),
+                                 m.getNoticeUseYn(), m.getNoticeFixedYn(), m.getNoticeEnrollmentDate()))
+                         .toList();
     }
 
-
-    public NoticeDto getNoticeDetail(String noticeId, String accessToken) {
-        Token.checkToken(accessToken);
-
-        NoticeDto noticeDetail = noticeDao.getNoticeDetail(noticeId);
+    public NoticeResponse getNoticeDetail(String noticeId) {
+        Notice noticeDetail = Optional.of(noticeDao.getNoticeDetail(noticeId))
+                                      .orElseThrow(() -> new ClientException(ErrorCode.SERVER_ERROR));
 
         if (ObjectUtils.isEmpty(noticeDetail)) {
             throw new ClientException(ErrorCode.SELECT_FAIL);
         }
 
-        return noticeDetail;
+        return modelMapper.map(noticeDetail, NoticeResponse.class);
     }
 
-    public NoticeDto registerNotice(NoticeDto request, String accessToken) {
-        Token.checkToken(accessToken);
+    public String registerNotice(NoticeRequest request) {
+        Notice notice = Notice.builder()
+                              .noticeTitle(request.getTitle())
+                              .noticeContent(request.getContent())
+                              .noticeUseYn(1)
+                              .noticeFixedYn(request.getFixedYn())
+                              .noticeEnrollmentDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT)))
+                              .build();
 
-        Member member = memberDao.getMemberByToken(accessToken);
-
-        // set writer(memberId), createDateTime
-        request.setWriter(member.getId());
-        request.setEnrollmentDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
-
-        int result = noticeDao.registerNotice(request);
+        int result = Optional.of(noticeDao.registerNotice(notice))
+                             .orElseThrow(() -> new ClientException(ErrorCode.SERVER_ERROR));
 
         if (result < 1) {
             throw new ClientException(ErrorCode.INSERT_FAIL);
         }
 
-        return new NoticeDto(request.getId(), member.getId(), request.getTitle(), request.getContent(), 1, request.getEnrollmentDateTime());
+        return notice.getNoticeId();
     }
 
-    public String deleteNotice(String noticeId, String accessToken) {
-        Token.checkToken(accessToken);
-
-        Member member = memberDao.getMemberByToken(accessToken);
-
-        NoticeDto notice = noticeDao.getNoticeDetail(noticeId);
-
-        if (!notice.getWriter().equals(member.getId())) {
-            throw new ClientException(ErrorCode.INVALID_ACCOUNT);
-        }
-
-        int result = noticeDao.deleteNotice(noticeId);
+    public String deleteNotice(String noticeId) {
+        int result = Optional.of(noticeDao.deleteNotice(noticeId))
+                             .orElseThrow(() -> new ClientException(ErrorCode.SERVER_ERROR));
 
         if (result < 1) {
             throw new ClientException(ErrorCode.DELETE_FAIL);

@@ -1,17 +1,17 @@
 package com.api.pple.dao;
 
-import com.api.pple.dto.AdDto;
+import com.api.pple.entity.Advertise;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface AdDao {
-    List<AdDto> getAdList();
+    List<Advertise> getAdList();
 
-    AdDto getAdDetail(String adCode);
+    Advertise getAdDetail(String advertiseCode);
 
-    int registerAd(AdDto request);
+    int registerAd(Advertise request);
 
-    int deleteAd(String adCode);
+    int deleteAd(String advertiseCode);
 }

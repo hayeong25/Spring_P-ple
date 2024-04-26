@@ -1,20 +1,14 @@
-package com.api.pple.dto;
+package com.api.pple.dto.request;
 
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 
 @Getter
-@Builder
-@AllArgsConstructor
-public class MemberDto {
-    private String id;
-    private String name;
-    private String accessToken;
-
+@Setter
+public class MemberRequest {
     @Getter
     @Setter
-    @ToString
     @AllArgsConstructor
     public static class Join {
         @NotBlank
@@ -28,17 +22,12 @@ public class MemberDto {
         @NotBlank
         private String email;
         @NotBlank
-        private String businessNo;
-        @NotBlank
-        private String companyName;
-        @NotBlank
         private String zipcode;
         @NotBlank
         private String address;
     }
 
     @Getter
-    @ToString
     @AllArgsConstructor
     public static class Login {
         @NotBlank
@@ -48,7 +37,6 @@ public class MemberDto {
     }
 
     @Getter
-    @ToString
     @AllArgsConstructor
     public static class FindId {
         @NotBlank
@@ -58,7 +46,6 @@ public class MemberDto {
     }
 
     @Getter
-    @ToString
     @AllArgsConstructor
     public static class FindPw {
         @NotBlank
@@ -72,7 +59,15 @@ public class MemberDto {
     }
 
     @Getter
-    @ToString
+    @AllArgsConstructor
+    public static class Business {
+        @NotBlank
+        private String businessNo;
+        @NotBlank
+        private String companyName;
+    }
+
+    @Getter
     @AllArgsConstructor
     public static class Modify {
         @NotBlank
@@ -80,5 +75,19 @@ public class MemberDto {
         private String prePassword;
         private String newPassword;
         private String telNo;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class Point {
+        @NotBlank
+        private String id;
+        @NotBlank
+        private String type;
+        @NotBlank
+        private String status;
+        private int point;
+        @NotBlank
+        private String content;
     }
 }
